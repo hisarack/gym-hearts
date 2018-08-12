@@ -21,12 +21,19 @@ class HeartsEnv(gym.Env):
         self._current_player_id = 0
 
     def get_observation(self):
-        return {
-            'hand_cards': self._players[self._current_player_id].get_hand_cards(),
-            'score': self._players[self._current_player_id].get_score(),
-            'playing_cards': self._playing_cards.copy(),
-            'playing_ids': self._playing_ids.copy()
-        }
+        ob = {}
+        ob['scores'] = [player.get_score() for player in self._players]
+        ob['playing_cards'] = self._playing_cards.copy()
+        ob['playing_ids'] = self._playing_ids.copy()
+        ob['hand_cards'] =self._players[self._current_player_id].get_hand_cards()
+        if len(self._playing_cards) == 0:
+            ob['valid_hand_cards'] = ob['hand_cards']
+        else:
+            trick_suit = Card.get_suit_int(self._playing_cards[0])
+            ob['valid_hand_cards'] = [card for card in ob['hand_cards'] if Card.get_suit_int(card) == trick_suit]
+            if len(ob['valid_hand_cards']) == 0:
+                ob['valid_hand_cards'] = ob['hand_cards']
+        return ob
 
     def step(self, action_card):
         if len(self._playing_cards) == self._number_of_players:

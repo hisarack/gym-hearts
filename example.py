@@ -9,6 +9,6 @@ observation = env.get_observation()
 
 done = False
 while not done:
-    action_card = observation['hand_cards'][0]
-    observation, reward, done, info = env.step(action_card)
+    action = observation['valid_hand_cards'][0]
+    observation, reward, done, info = env.step(action)
     env.render()
