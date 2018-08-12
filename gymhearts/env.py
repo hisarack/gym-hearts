@@ -9,16 +9,19 @@ from .evaluator import Evaluator
 
 class HeartsEnv(gym.Env):
 
-    def __init__(self):
+    def __init__(self, endgame_score=100):
         self._number_of_players = 4
+        self._number_of_hand_card_per_player = 52 // self._number_of_players
         self._evaluator = Evaluator()
         self._deck = Deck()
         self._deck.shuffle()
-        self._players = [Player(i, self._deck.draw(13)) for i in range(self._number_of_players)]
+        self._players = [Player(i, self._deck.draw(self._number_of_hand_card_per_player)) for i in range(self._number_of_players)]
         self._trick = 0
+        self._round = 0 # each round has 13 trick when we have 4 players
         self._playing_cards = []
         self._playing_ids = []
         self._current_player_id = 0
+        self._endgame_score = endgame_score
 
     def get_observation(self):
         ob = {}
@@ -46,7 +49,6 @@ class HeartsEnv(gym.Env):
             self._trick += 1
             punish_score, punish_player_id = self._evaluator.evaluate(self._playing_cards, self._playing_ids)
             self._players[punish_player_id].add_score(punish_score)
-        done = self._trick == 13
         rewards = [0] * self._number_of_players
         info = {}
         if len(self._playing_cards) == self._number_of_players:
@@ -55,17 +57,39 @@ class HeartsEnv(gym.Env):
         else:
             self._current_player_id += 1
             self._current_player_id = self._current_player_id % 4
+        done = False
+        if self._trick == self._number_of_hand_card_per_player:
+            scores = [player.get_score() for player in self._players]
+            for score in scores:
+                if score >= 100:
+                    done = True
+                    break
+            if done is False:
+                self._start_new_round()
         observation = self.get_observation()
         return observation, rewards, done, info
 
-    def reset(self):
+    def _start_new_round(self):
         self._deck = Deck()
         self._deck.shuffle()
-        self._players = [Player(i, self._deck.draw(13)) for i in range(self._number_of_players)]
+        for player in self._players:
+            player.reset_hand_cards(self._deck.draw(self._number_of_hand_card_per_player))
         self._trick = 0
         self._playing_cards = []
         self._playing_ids = []
         self._current_player_id = 0
+        self._round += 1
+
+    def reset(self):
+        self._deck = Deck()
+        self._deck.shuffle()
+        for player in self._players:
+            player.reset(self._deck.draw(self._number_of_hand_card_per_player))
+        self._trick = 0
+        self._playing_cards = []
+        self._playing_ids = []
+        self._current_player_id = 0
+        self._round = 0
 
     def render(self, mode='human', close=False):
         print("-------PLAYER------")

@@ -10,6 +10,9 @@ class Player(object):
         self.score = 0
         self.hand_cards = cards
 
+    def reset_hand_cards(self, cards):
+        self.hand_cards = cards
+
     def remove_hand_card(self, action_card):
         if action_card in self.hand_cards:
             self.hand_cards.remove(action_card)
