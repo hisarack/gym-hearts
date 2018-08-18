@@ -20,6 +20,12 @@ class Player(object):
         else:
             print("Error! action card not in the hand cards")
 
+    def _watch(self, observation, info):
+        try:
+            self._strategy.watch(observation, info)
+        except NotImplementedError:
+            pass
+
     def move(self, observation):
         action = self._strategy.move(observation)
         return action

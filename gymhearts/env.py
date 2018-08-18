@@ -52,6 +52,9 @@ class HeartsEnv(gym.Env):
             self._start_new_round()
 
     def step(self, action_card):
+        info = {}
+        info['current_player_id'] = self._current_player_id
+        info['action'] = action_card
         if len(self._playing_cards) == self._number_of_players:
             self._playing_cards.clear()
             self._playing_ids.clear()
@@ -62,8 +65,9 @@ class HeartsEnv(gym.Env):
             self._trick += 1
             punish_score, punish_player_id = self._evaluator.evaluate(self._playing_cards, self._playing_ids)
             self._players[punish_player_id].add_score(punish_score)
+            info['punish_score'] = punish_score
+            info['punish_player_id'] = punish_player_id
         rewards = [0] * self._number_of_players
-        info = {}
         if len(self._playing_cards) == self._number_of_players:
             self._current_player_id = punish_player_id
             rewards[punish_player_id] = punish_score
@@ -71,6 +75,7 @@ class HeartsEnv(gym.Env):
             self._current_player_id += 1
             self._current_player_id = self._current_player_id % 4
         done = False
+        is_new_round = False
         if self._trick == self._number_of_hand_card_per_player:
             scores = [player.get_score() for player in self._players]
             for score in scores:
@@ -79,9 +84,17 @@ class HeartsEnv(gym.Env):
                     break
             if done is False:
                 self._start_new_round()
+                is_new_round = True
+        info['is_new_round'] = is_new_round
+        info['done'] = done
         observation = self.get_observation()
         self._current_observation = observation
+        self._players_watch(info)
         return observation, rewards, done, info
+
+    def _players_watch(self, info):
+        for player in self._players:
+            player._watch(self._current_observation, info)
 
     def move(self):
         return self._players[self._current_player_id].move(self._current_observation)
