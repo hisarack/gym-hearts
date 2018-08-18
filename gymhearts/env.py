@@ -26,6 +26,7 @@ class HeartsEnv(gym.Env):
         ob = {}
         ob['trick'] = self._trick
         ob['round'] = self._round
+        ob['number_of_players'] = self._number_of_players
         ob['scores'] = [player.get_score() for player in self._players]
         ob['playing_cards'] = self._playing_cards.copy()
         ob['playing_ids'] = self._playing_ids.copy()

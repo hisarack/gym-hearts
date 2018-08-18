@@ -9,14 +9,14 @@ class Evaluator(object):
     def __init__(self):
         pass
         
-    def _calculate_score(self, cards):
+    def calculate_score(self, cards):
         suits = [Card.get_suit_int(c) for c in cards]
         score = suits.count(Card.CHAR_SUIT_TO_INT_SUIT['h'])
         if Evaluator.SPADES_QUEEN in cards:
             score += 13
         return score
 
-    def _identify_looser(self, cards, ids):
+    def identify_looser(self, cards, ids):
         suits = [Card.get_suit_int(c) for c in cards]
         if suits[1:].count(suits[0]) == 0:
             return ids[0]
@@ -33,5 +33,5 @@ class Evaluator(object):
         return ids[max_index]
                 
     def evaluate(self, cards, ids):
-        return self._calculate_score(cards), self._identify_looser(cards, ids)
+        return self.calculate_score(cards), self.identify_looser(cards, ids)
 
