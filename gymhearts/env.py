@@ -24,10 +24,12 @@ class HeartsEnv(gym.Env):
 
     def get_observation(self):
         ob = {}
+        ob['trick'] = self._trick
+        ob['round'] = self._round
         ob['scores'] = [player.get_score() for player in self._players]
         ob['playing_cards'] = self._playing_cards.copy()
         ob['playing_ids'] = self._playing_ids.copy()
-        ob['hand_cards'] =self._players[self._current_player_id].get_hand_cards()
+        ob['hand_cards'] = self._players[self._current_player_id].get_hand_cards()
         if len(self._playing_cards) == 0:
             ob['valid_hand_cards'] = ob['hand_cards']
         else:
@@ -110,8 +112,11 @@ class HeartsEnv(gym.Env):
         print("-------PLAYER------")
         for i in range(self._number_of_players):
             print("player {}".format(i))
-            Card.print_pretty_cards(self._players[i].get_hand_cards())
+            Card.print_pretty_cards(self._players[i].get_hand_cards(is_sorted=True))
             print("score: {}".format(self._players[i].get_score()))
         print("--------BOARD-------")
-        Card.print_pretty_cards(self._playing_cards)
+        playing_card_strs = ["[]"] * self._number_of_players
+        for playing_id, playing_card in zip(self._playing_ids, self._playing_cards):
+            playing_card_strs[playing_id] = Card.int_to_pretty_str(playing_card)
+        print(' '.join(playing_card_strs))
         print("--------------------")

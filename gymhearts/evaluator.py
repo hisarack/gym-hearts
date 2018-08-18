@@ -29,7 +29,7 @@ class Evaluator(object):
                 tmp_rank = Card.get_rank_int(cards[i])
                 if tmp_rank > max_rank:
                     max_index = i
-                    tmp_rank = max_rank
+                    max_rank = tmp_rank
         return ids[max_index]
                 
     def evaluate(self, cards, ids):

@@ -27,8 +27,14 @@ class Player(object):
     def add_score(self, score):
         self._score += score
 
-    def get_hand_cards(self):
-        return self._hand_cards
+    def get_hand_cards(self, is_sorted=False):
+        if is_sorted is False:
+            return self._hand_cards
+        else:
+            suitrank_ints = [c & 0xFF00 for c in self._hand_cards]
+            sorted_indices = sorted(range(len(suitrank_ints)), key=lambda k: suitrank_ints[k])
+            sorted_cards = [self._hand_cards[ind] for ind in sorted_indices]
+            return sorted_cards
 
     def get_score(self):
         return self._score
