@@ -10,18 +10,17 @@ from .evaluator import Evaluator
 class HeartsEnv(gym.Env):
 
     def __init__(self, endgame_score=100):
-        self._number_of_players = 4
-        self._number_of_hand_card_per_player = 52 // self._number_of_players
         self._evaluator = Evaluator()
-        self._deck = Deck()
-        self._deck.shuffle()
-        self._players = [Player(i, self._deck.draw(self._number_of_hand_card_per_player)) for i in range(self._number_of_players)]
+        self._number_of_players = 0
+        self._number_of_hand_card_per_player = 0
+        self._players = []
         self._trick = 0
         self._round = 0 # each round has 13 trick when we have 4 players
         self._playing_cards = []
         self._playing_ids = []
         self._current_player_id = 0
         self._endgame_score = endgame_score
+        self._current_observation = {}
 
     def get_observation(self):
         ob = {}
@@ -37,6 +36,17 @@ class HeartsEnv(gym.Env):
             if len(ob['valid_hand_cards']) == 0:
                 ob['valid_hand_cards'] = ob['hand_cards']
         return ob
+
+    def add_player(self, strategy):
+        player_id = len(self._players)
+        player = Player(player_id, strategy)
+        self._players.append(player)
+
+    def start(self):
+        if self._trick == 0 and self._round == 0:
+            self._number_of_players = len(self._players)
+            self._number_of_hand_card_per_player = 52 // self._number_of_players
+            self._start_new_round()
 
     def step(self, action_card):
         if len(self._playing_cards) == self._number_of_players:
@@ -67,7 +77,11 @@ class HeartsEnv(gym.Env):
             if done is False:
                 self._start_new_round()
         observation = self.get_observation()
+        self._current_observation = observation
         return observation, rewards, done, info
+
+    def move(self):
+        return self._players[self._current_player_id].move(self._current_observation)
 
     def _start_new_round(self):
         self._deck = Deck()
@@ -79,6 +93,7 @@ class HeartsEnv(gym.Env):
         self._playing_ids = []
         self._current_player_id = 0
         self._round += 1
+        self._current_observation = self.get_observation()
 
     def reset(self):
         self._deck = Deck()
