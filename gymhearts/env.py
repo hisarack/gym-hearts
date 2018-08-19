@@ -31,6 +31,7 @@ class HeartsEnv(gym.Env):
         ob['playing_cards'] = self._playing_cards.copy()
         ob['playing_ids'] = self._playing_ids.copy()
         ob['hand_cards'] = self._players[self._current_player_id].get_hand_cards()
+        ob['current_player_id'] = self._current_player_id
         if len(self._playing_cards) == 0:
             ob['valid_hand_cards'] = ob['hand_cards']
         else:
@@ -38,12 +39,26 @@ class HeartsEnv(gym.Env):
             ob['valid_hand_cards'] = [card for card in ob['hand_cards'] if Card.get_suit_int(card) == trick_suit]
             if len(ob['valid_hand_cards']) == 0:
                 ob['valid_hand_cards'] = ob['hand_cards']
+        ob['number_of_hand_cards_for_all_players'] = [len(player.get_hand_cards()) for player in self._players]
         return ob
 
-    def add_player(self, strategy):
+    def add_player(self, strategy, hand_cards=None):
         player_id = len(self._players)
         player = Player(player_id, strategy)
         self._players.append(player)
+        if hand_cards is not None:
+            self._reset_hand_cards(hand_cards)
+
+    def copy_observation(self, observation):
+        ob = observation
+        self._number_of_players = ob['number_of_players']
+        self._number_of_hand_card_per_player = 52 // self._number_of_players
+        self._trick = ob['trick']
+        self._round = ob['round']
+        self._playing_cards = ob['playing_cards'].copy()
+        self._playing_ids = ob['playing_ids'].copy()
+        self._current_player_id = ob['current_player_id']
+        self._current_observation = self.get_observation()
 
     def start(self):
         if self._trick == 0 and self._round == 0:
@@ -100,10 +115,10 @@ class HeartsEnv(gym.Env):
         return self._players[self._current_player_id].move(self._current_observation)
 
     def _start_new_round(self):
-        self._deck = Deck()
-        self._deck.shuffle()
+        deck = Deck()
+        deck.shuffle()
         for player in self._players:
-            player.reset_hand_cards(self._deck.draw(self._number_of_hand_card_per_player))
+            player.reset_hand_cards(deck.draw(self._number_of_hand_card_per_player))
         self._trick = 0
         self._playing_cards = []
         self._playing_ids = []
@@ -112,10 +127,10 @@ class HeartsEnv(gym.Env):
         self._current_observation = self.get_observation()
 
     def reset(self):
-        self._deck = Deck()
-        self._deck.shuffle()
+        deck = Deck()
+        deck.shuffle()
         for player in self._players:
-            player.reset(self._deck.draw(self._number_of_hand_card_per_player))
+            player.reset(deck.draw(self._number_of_hand_card_per_player))
         self._trick = 0
         self._playing_cards = []
         self._playing_ids = []
