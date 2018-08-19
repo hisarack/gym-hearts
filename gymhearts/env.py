@@ -45,9 +45,9 @@ class HeartsEnv(gym.Env):
     def add_player(self, strategy, hand_cards=None):
         player_id = len(self._players)
         player = Player(player_id, strategy)
-        self._players.append(player)
         if hand_cards is not None:
-            self._reset_hand_cards(hand_cards)
+            player.reset_hand_cards(hand_cards)
+        self._players.append(player)
 
     def copy_observation(self, observation):
         ob = observation
