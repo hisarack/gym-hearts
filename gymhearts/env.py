@@ -138,6 +138,9 @@ class HeartsEnv(gym.Env):
         self._round = 0
 
     def render(self, mode='human', close=False):
+        print("--------GAME-------")
+        print("round: {}".format(self._round))
+        print("trick: {}".format(self._trick))
         print("-------PLAYER------")
         for i in range(self._number_of_players):
             print("player {}".format(i))
@@ -149,3 +152,4 @@ class HeartsEnv(gym.Env):
             playing_card_strs[playing_id] = Card.int_to_pretty_str(playing_card)
         print(' '.join(playing_card_strs))
         print("--------------------")
+        print("")

@@ -18,7 +18,7 @@ class Player(object):
         if action_card in self._hand_cards:
             self._hand_cards.remove(action_card)
         else:
-            print("Error! action card not in the hand cards")
+            raise Exception("Error! action card not in the hand cards")
 
     def _watch(self, observation, info):
         try:
