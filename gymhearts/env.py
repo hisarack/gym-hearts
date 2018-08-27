@@ -144,7 +144,8 @@ class HeartsEnv(gym.Env):
         print("-------PLAYER------")
         for i in range(self._number_of_players):
             print("player {}".format(i))
-            Card.print_pretty_cards(self._players[i].get_hand_cards(is_sorted=True))
+            playing_cards = [Card.int_to_pretty_str(c) for c in self._players[i].get_hand_cards(is_sorted=True)]
+            print(' '.join(playing_cards))
             print("score: {}".format(self._players[i].get_score()))
         print("--------BOARD-------")
         playing_card_strs = ["[]"] * self._number_of_players
