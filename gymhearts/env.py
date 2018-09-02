@@ -112,6 +112,9 @@ class HeartsEnv(gym.Env):
             player._watch(self._current_observation, info)
 
     def move(self):
+        if len(self._current_observation['playing_cards']) == 4:
+            self._current_observation['playing_cards'].clear()
+            self._current_observation['playing_ids'].clear()
         return self._players[self._current_player_id].move(self._current_observation)
 
     def _start_new_round(self):
