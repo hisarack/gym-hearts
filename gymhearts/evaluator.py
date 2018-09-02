@@ -31,7 +31,17 @@ class Evaluator(object):
                     max_index = i
                     max_rank = tmp_rank
         return ids[max_index]
-                
+    
+    def shooting_the_moon(self, players):
+        round_scores = [p.get_uncommited_score() for p in players]
+        max_score = max(round_scores)
+        max_score_player_id = round_scores.index(max_score)
+        if max_score == 26:
+            for player_id, p in enumerate(players):
+                p.rollback_to_last_commited_score()
+                if player_id != max_score_player_id:
+                    p.add_score(26)
+
     def evaluate(self, cards, ids):
         return self.calculate_score(cards), self.identify_looser(cards, ids)
 

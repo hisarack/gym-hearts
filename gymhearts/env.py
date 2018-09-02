@@ -21,6 +21,10 @@ class HeartsEnv(gym.Env):
         self._current_player_id = 0
         self._endgame_score = endgame_score
         self._current_observation = {}
+        self._shooting_the_moon_enabled = False
+
+    def enable_shooting_the_moon(self):
+        self._shooting_the_moon_enabled = True
 
     def get_observation(self):
         ob = {}
@@ -102,6 +106,11 @@ class HeartsEnv(gym.Env):
                 is_new_round = True
         info['is_new_round'] = is_new_round
         info['done'] = done
+        if is_new_round or done:
+            if self._shooting_the_moon_enabled is True:
+                self._evaluator.shooting_the_moon(self._players)
+            for player in self._players:
+                player.commit_new_round_score()
         observation = self.get_observation()
         self._current_observation = observation
         self._players_watch(info)
@@ -140,7 +149,7 @@ class HeartsEnv(gym.Env):
         self._current_player_id = 0
         self._round = 0
 
-    def render(self, mode='human', close=False):
+    def render(self):
         print("--------GAME-------")
         print("round: {}".format(self._round))
         print("trick: {}".format(self._trick))

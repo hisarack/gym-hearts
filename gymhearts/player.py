@@ -6,10 +6,12 @@ class Player(object):
         self._score = 0
         self._strategy = strategy
         self._hand_cards = []
+        self._round_scores = []
     
     def reset(self, cards):
         self._score = 0
         self._hand_cards = cards
+        self._round_scores = []
 
     def reset_hand_cards(self, cards):
         self._hand_cards = cards
@@ -44,3 +46,18 @@ class Player(object):
 
     def get_score(self):
         return self._score
+
+    def commit_new_round_score(self):
+        self._round_scores.append(self._score)
+
+    def get_uncommited_score(self):
+        if len(self._round_scores) == 0:
+            return self._score
+        else:
+            return self._score - self._round_scores[-1]
+
+    def rollback_to_last_commited_score(self):
+        if len(self._round_scores) == 0:
+            self._score = 0
+        else:
+            self._score = self._round_scores[-1]

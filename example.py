@@ -11,6 +11,7 @@ class HelloStrategy(strategy.IStrategy):
 
 
 env = hearts_env.HeartsEnv()
+env.enable_shooting_the_moon()
 env.add_player(HelloStrategy())
 env.add_player(HelloStrategy())
 env.add_player(HelloStrategy())
