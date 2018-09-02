@@ -1,3 +1,46 @@
+# Gym Hearts
+
+This is an experimental library for hearts poker game and reinforment learning.
+I implement the library and run it at ubuntu and mac by python3.
+If you encounter any problem, feel free to create new issue on this project :smile:
+
+
+# Installation
+
+```sh
+pip3 install gym-hearts
+```
+
+# Hello World
+
+```python
+import gym
+from gymhearts import env as hearts_env
+from gymhearts import strategy
+
+
+class HelloStrategy(strategy.IStrategy):
+
+    def move(self, observation):
+        action = observation['valid_hand_cards'][0]
+        return action
+
+
+env = hearts_env.HeartsEnv()
+env.add_player(HelloStrategy())
+env.add_player(HelloStrategy())
+env.add_player(HelloStrategy())
+env.add_player(HelloStrategy())
+env.start()
+env.render()
+observation = env.get_observation()
+done = False
+while not done:
+    action = env.move()
+    observation, reward, done, info = env.step(action)
+    env.render()
+```
+
 # Observation
 
 ```json
