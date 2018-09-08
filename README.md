@@ -74,6 +74,7 @@ while not done:
 --------GAME-------
 round: 9
 trick: 11
+heart broken: True
 -------PLAYER------
 player 0
 [7♠]
