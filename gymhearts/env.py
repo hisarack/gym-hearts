@@ -9,6 +9,8 @@ from .evaluator import Evaluator
 
 class HeartsEnv(gym.Env):
 
+    CLUB_TWO = Card.new('2c')
+
     def __init__(self, endgame_score=100):
         self._evaluator = Evaluator()
         self._number_of_players = 0
@@ -22,9 +24,32 @@ class HeartsEnv(gym.Env):
         self._endgame_score = endgame_score
         self._current_observation = {}
         self._shooting_the_moon_enabled = False
+        self._is_heart_broken = False
 
     def enable_shooting_the_moon(self):
         self._shooting_the_moon_enabled = True
+
+
+    def _filter_valid_hand_cards(self, hand_cards):
+        if len(self._playing_cards) == 0:
+            if self._trick == 0:
+                if HeartsEnv.CLUB_TWO not in hand_cards:
+                    raise Exception("oops, first player does not have club two")
+                valid_hand_cards = [HeartsEnv.CLUB_TWO]
+            elif self._is_heart_broken is True:
+                valid_hand_cards = hand_cards
+            else:
+                valid_hand_cards = [card for card in hand_cards if Card.get_suit_int(card) != Card.CHAR_SUIT_TO_INT_SUIT['h']]
+        else:
+            trick_suit = Card.get_suit_int(self._playing_cards[0])
+            valid_hand_cards = [card for card in hand_cards if Card.get_suit_int(card) == trick_suit]
+            if len(valid_hand_cards) == 0:
+                valid_hand_cards = hand_cards
+            if self._trick == 0:
+                valid_hand_cards = [card for card in valid_hand_cards if Card.get_suit_int(card) != Card.CHAR_SUIT_TO_INT_SUIT['h']]
+        if (self._trick == 0) and (Evaluator.SPADES_QUEEN in valid_hand_cards):
+            valid_hand_cards.remove(Evaluator.SPADES_QUEEN)
+        return valid_hand_cards
 
     def get_observation(self):
         ob = {}
@@ -36,13 +61,7 @@ class HeartsEnv(gym.Env):
         ob['playing_ids'] = self._playing_ids.copy()
         ob['hand_cards'] = self._players[self._current_player_id].get_hand_cards()
         ob['current_player_id'] = self._current_player_id
-        if len(self._playing_cards) == 0:
-            ob['valid_hand_cards'] = ob['hand_cards']
-        else:
-            trick_suit = Card.get_suit_int(self._playing_cards[0])
-            ob['valid_hand_cards'] = [card for card in ob['hand_cards'] if Card.get_suit_int(card) == trick_suit]
-            if len(ob['valid_hand_cards']) == 0:
-                ob['valid_hand_cards'] = ob['hand_cards']
+        ob['valid_hand_cards'] = self._filter_valid_hand_cards(ob['hand_cards'])
         ob['number_of_hand_cards_for_all_players'] = [len(player.get_hand_cards()) for player in self._players]
         return ob
 
@@ -113,6 +132,8 @@ class HeartsEnv(gym.Env):
                 player.commit_new_round_score()
         observation = self.get_observation()
         self._current_observation = observation
+        if self._is_heart_broken is False and Card.get_suit_int(action_card) == Card.CHAR_SUIT_TO_INT_SUIT['h']:
+                self._is_heart_broken = True
         self._players_watch(info)
         return observation, rewards, done, info
 
@@ -129,13 +150,20 @@ class HeartsEnv(gym.Env):
     def _start_new_round(self):
         deck = Deck()
         deck.shuffle()
-        for player in self._players:
-            player.reset_hand_cards(deck.draw(self._number_of_hand_card_per_player))
+        club_two_player_id = -1
+        for player_id, player in enumerate(self._players):
+            hand_cards = deck.draw(self._number_of_hand_card_per_player)
+            player.reset_hand_cards(hand_cards)
+            if HeartsEnv.CLUB_TWO in hand_cards:
+                club_two_player_id = player_id
+        if club_two_player_id == -1:
+            raise Exception("oops, it cannot find a player has club two")
         self._trick = 0
         self._playing_cards = []
         self._playing_ids = []
-        self._current_player_id = 0
+        self._current_player_id = club_two_player_id
         self._round += 1
+        self._is_heart_broken = False
         self._current_observation = self.get_observation()
 
     def reset(self):
@@ -148,11 +176,13 @@ class HeartsEnv(gym.Env):
         self._playing_ids = []
         self._current_player_id = 0
         self._round = 0
+        self._is_heart_broken = False
 
     def render(self):
         print("--------GAME-------")
         print("round: {}".format(self._round))
         print("trick: {}".format(self._trick))
+        print("heart broken: {}".format(self._is_heart_broken))
         print("-------PLAYER------")
         for i in range(self._number_of_players):
             print("player {}".format(i))

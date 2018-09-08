@@ -42,6 +42,17 @@ class Evaluator(object):
                 if player_id != max_score_player_id:
                     p.add_score(26)
 
+    def filter_score_cards(hand_cards, keep_spade_queen=False):
+        valid_hand_cards = []
+        for card in hand_cards:
+            if Card.get_suit_int(card) == Card.CHAR_SUIT_TO_INT_SUIT['h']:
+                pass
+            elif keep_spade_queen is False and Card.get_suit_int(card) == Evaluator.SPADES_QUEEN:
+                pass
+            else:
+                valid_hand_cards.append(card)
+        return valid_hand_cards
+
     def evaluate(self, cards, ids):
         return self.calculate_score(cards), self.identify_looser(cards, ids)
 
