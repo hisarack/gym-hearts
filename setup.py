@@ -5,7 +5,7 @@ with open("README.md") as readme:
 
 setup(
   name='gym-hearts',
-  version='0.0.2',
+  version='0.0.3',
   long_description=long_description,
   url='https://github.com/hisarack/gym-hearts',
   author='Billy Yang',
