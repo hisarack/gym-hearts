@@ -11,6 +11,8 @@ If you encounter any problem, feel free to create new issue on this project :smi
 2. Q♠ costs 13 score
 3. This trick’s looser will be next trick’s first player
 4. Shooting the moon
+5. The player holding 2♣ must lead it to begin the first trick
+6. Hearts cannot be led until they have been "broken"
 
 # Installation
 
