@@ -134,6 +134,7 @@ class HeartsEnv(gym.Env):
         self._current_observation = observation
         if self._is_heart_broken is False and Card.get_suit_int(action_card) == Card.CHAR_SUIT_TO_INT_SUIT['h']:
                 self._is_heart_broken = True
+        info['is_heart_broken'] = self._is_heart_broken
         self._players_watch(info)
         return observation, rewards, done, info
 
